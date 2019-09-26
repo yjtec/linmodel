@@ -1,0 +1,23 @@
+{
+    "name": "yjtec/linmodel",
+    "description": "数据库操作",
+    "keywords": ["cache", "linphe"],
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "ax",
+            "email": "18716463@qq.com"
+        }
+    ],
+    "require": {
+        "php": ">5.6",
+        "ext-pdo_mysql": ">5.0",
+        "yjtec/lintools": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Yjtec\\Linmodel\\": "src/"
+        }
+    }
+}
