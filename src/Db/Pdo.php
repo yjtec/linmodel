@@ -15,6 +15,8 @@ class Pdo extends Driver {
     protected $tableName;
     protected $transTimes = 0;
     protected $error;
+    protected $lastSQL = '';
+    protected $lastSQLBind = [];
 ////////////sql中用到的变量////////////
     protected $numRows;
     protected $whereStr = '1';
@@ -40,6 +42,8 @@ class Pdo extends Driver {
      * @return mixed
      */
     public function query($sql, $bind = array()) {
+        $this->lastSQL = $sql;
+        $this->lastSQLBind = $bind;
         $this->connect();
         if (!empty($this->PDOStatement)) {
             $this->free(); //释放前次的查询结果
@@ -69,6 +73,8 @@ class Pdo extends Driver {
      * @return integer
      */
     public function execute($sql, $bind = array()) {
+        $this->lastSQL = $sql;
+        $this->lastSQLBind = $bind;
         $this->connect();
         if (!empty($this->PDOStatement)) {
             $this->free(); //释放前次的查询结果
@@ -107,6 +113,7 @@ class Pdo extends Driver {
     }
 
 /////////////////////////////////////以下方法为新支持方法/////////////////////////////////////
+
     /**
      * 新增多条数据
      * [[field=>value,field=>value,field=>value],[field=>value,field=>value,field=>value],[field=>value,field=>value,field=>value]]
@@ -293,6 +300,10 @@ class Pdo extends Driver {
         return $this->error;
     }
 
+    public function lastSql() {
+        return ['_sql' => $this->lastSQL, '_bind' => $this->lastSQLBind];
+    }
+
     /**
      * 获取最后插入id
      * @access public
@@ -363,10 +374,10 @@ class Pdo extends Driver {
     public function connect($config = '') {
         if (!isset($this->linkPDO)) {
             if (isset($this->config['db_persistent']) && $this->config['db_persistent']) {
-                $this->config['db_params'][Pdo::ATTR_PERSISTENT] = true; // 是否使用永久连接
+                $this->config['db_params'][\Pdo::ATTR_PERSISTENT] = true; // 是否使用永久连接
             }
             if (version_compare(PHP_VERSION, '5.3.6', '<=')) {
-                $this->config['db_params'][Pdo::ATTR_EMULATE_PREPARES] = false; //禁用模拟预处理语句
+                $this->config['db_params'][\Pdo::ATTR_EMULATE_PREPARES] = false; //禁用模拟预处理语句
             }
             try {
                 $this->linkPDO = new \PDO("mysql:host=" . $this->config['db_host'] . ";port=" . $this->config['db_port'] . ";dbname=" . $this->config['db_name'] . "", $this->config['db_user'], $this->config['db_pwd'], $this->config['db_params']);
@@ -375,10 +386,32 @@ class Pdo extends Driver {
                 throw $e;
             }
         }
+        if ($this->config['db_check'] && !$this->reConnTimes && !$this->checkConn()) {//配置参数中，要求时刻检查数据库连接情况，并且重连次数未超额
+            $this->reConnTimes--;
+            $this->connect();
+        }
+        $this->reConnTimes = 3; //重置重连次数限额
         if (!$this->linkPDO) {
             throw new Exception('数据库连接失败');
         }
         return $this->linkPDO;
+    }
+
+    public $reConnTimes = 3;
+
+    public function checkConn() {
+        if (!isset($this->linkPDO)) {
+            return false;
+        }
+        try {
+            $this->linkPDO->getAttribute(PDO::ATTR_SERVER_INFO); //获取数据库基本信息，作为心跳标志
+        } catch (PDOException $e) {
+//            if (strpos($e->getMessage(), 'MySQL server has gone away') !== false) {
+//                return false;
+//            }
+            return false;
+        }
+        return true;
     }
 
 }

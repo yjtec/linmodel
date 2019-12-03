@@ -60,6 +60,10 @@ class Model implements Intf {
         return $this->db->execute($sql, $bind);
     }
 
+    public function lastSql() {
+        return $this->db->lastSql();
+    }
+
     public function table($table = '') {
         $this->tableName = $table;
         return $this;

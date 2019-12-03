@@ -71,6 +71,8 @@ interface Intf {
      */
     public function order($order);
 
+    public function lastSql();
+
     /////////////////////////////事务支持/////////////////////////////
     public function startTrans();
 
