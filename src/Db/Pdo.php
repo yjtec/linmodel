@@ -386,7 +386,7 @@ class Pdo extends Driver {
                 throw $e;
             }
         }
-        if ($this->config['db_check'] && !$this->reConnTimes && !$this->checkConn()) {//配置参数中，要求时刻检查数据库连接情况，并且重连次数未超额
+        if (isset($this->config['db_check']) && $this->config['db_check'] && !$this->reConnTimes && !$this->checkConn()) {//配置参数中，要求时刻检查数据库连接情况，并且重连次数未超额
             $this->reConnTimes--;
             $this->connect();
         }
