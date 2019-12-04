@@ -73,6 +73,11 @@ interface Intf {
 
     public function lastSql();
 
+    /**
+     * 检查数据库连接是否可用
+     */
+    public function checkConn();
+
     /////////////////////////////事务支持/////////////////////////////
     public function startTrans();
 

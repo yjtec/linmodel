@@ -64,6 +64,14 @@ class Model implements Intf {
         return $this->db->lastSql();
     }
 
+    public function checkConn() {
+        return $this->db->checkConn();
+    }
+
+    public function resetConn() {
+        return $this->db->resetConn();
+    }
+
     public function table($table = '') {
         $this->tableName = $table;
         return $this;

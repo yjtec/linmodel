@@ -414,4 +414,8 @@ class Pdo extends Driver {
         return true;
     }
 
+    public function resetConn() {
+        $this->close();
+    }
+
 }
