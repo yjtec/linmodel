@@ -81,7 +81,7 @@ class Model implements Intf {
         if (empty($this->tableName)) {
             $this->tableName = \Yjtec\Lintools\Tools::parseName($this->dbConfig['db_prefix'] . $this->getModelName());
         }
-        return $this->dbConfig['db_name'] . '.' . $this->tableName;
+        return '`'.$this->dbConfig['db_name'] . '`.`' . $this->tableName.'`';
     }
 
     public function getModelName() {
