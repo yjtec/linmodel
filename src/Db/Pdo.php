@@ -7,7 +7,8 @@ use PDOException;
 /**
  * PDO数据库驱动 
  */
-class Pdo extends Driver {
+class Pdo extends Driver
+{
 
     protected $PDOStatement = null;
     protected $linkPDO = null;
@@ -17,7 +18,7 @@ class Pdo extends Driver {
     protected $error;
     protected $lastSQL = '';
     protected $lastSQLBind = [];
-////////////sql中用到的变量////////////
+    ////////////sql中用到的变量////////////
     protected $numRows;
     protected $whereStr = '1';
     protected $whereBindArray = [];
@@ -30,7 +31,8 @@ class Pdo extends Driver {
      * @access public
      * @param array $config 数据库配置数组
      */
-    public function __construct($config = '') {
+    public function __construct($config = '')
+    {
         $this->config = empty($config) ? [] : $config;
     }
 
@@ -41,7 +43,8 @@ class Pdo extends Driver {
      * @param array $bind 参数绑定
      * @return mixed
      */
-    public function query($sql, $bind = array()) {
+    public function query($sql, $bind = array())
+    {
         $this->lastSQL = $sql;
         $this->lastSQLBind = $bind;
         $this->connect();
@@ -72,7 +75,8 @@ class Pdo extends Driver {
      * @param array $bind 参数绑定
      * @return integer
      */
-    public function execute($sql, $bind = array()) {
+    public function execute($sql, $bind = array())
+    {
         $this->lastSQL = $sql;
         $this->lastSQLBind = $bind;
         $this->connect();
@@ -98,7 +102,8 @@ class Pdo extends Driver {
      * @access protected
      * @return void
      */
-    protected function bindPdoParam($bind) {
+    protected function bindPdoParam($bind)
+    {
         // 参数绑定
         if (!empty($bind)) {
             foreach ($bind as $key => $val) {
@@ -112,7 +117,7 @@ class Pdo extends Driver {
         }
     }
 
-/////////////////////////////////////以下方法为新支持方法/////////////////////////////////////
+    /////////////////////////////////////以下方法为新支持方法/////////////////////////////////////
 
     /**
      * 新增多条数据
@@ -120,7 +125,8 @@ class Pdo extends Driver {
      * @param type $data
      * @return boolean
      */
-    public function add($data) {
+    public function add($data)
+    {
         if (empty($data)) {
             return false;
         }
@@ -156,14 +162,16 @@ class Pdo extends Driver {
         return $numRows;
     }
 
-    public function delete() {
+    public function delete()
+    {
         $sql = 'DELETE FROM ' . $this->tableName . ' WHERE ' . $this->whereStr;
         $rs = $this->execute($sql, $this->whereBindArray);
         $this->resetWord();
         return $rs;
     }
 
-    public function update($data) {
+    public function update($data)
+    {
         if (empty($data)) {
             return false;
         }
@@ -183,7 +191,8 @@ class Pdo extends Driver {
         return $rs;
     }
 
-    public function select($one = false, $count = false) {
+    public function select($one = false, $count = false)
+    {
         $limit = $one ? "LIMIT 0,1" : $this->limit;
         $filed = ($count ? 'count(*) as cnt' : ($this->fields ? $this->fields : "*"));
         $sql = "SELECT " . $filed . ' FROM ' . $this->tableName . ' WHERE ' . $this->whereStr . ' ' . $this->order . ' ' . $limit . ' ';
@@ -202,7 +211,8 @@ class Pdo extends Driver {
      * @param type $field
      * @return type
      */
-    public function field($field = '*') {
+    public function field($field = '*', $dot = '`')
+    {
         if ($field == '*') {
             return $field;
         }
@@ -212,7 +222,7 @@ class Pdo extends Driver {
         $fStr = '';
         if (is_array($field) && !empty($field)) {
             foreach ($field as $f) {
-                $fStr .= '`' . str_replace('`', '', $f) . '`,';
+                $fStr .= $dot  .  $f . $dot . ',';
             }
             $fStr = rtrim($fStr, ',');
         }
@@ -220,12 +230,14 @@ class Pdo extends Driver {
         return $this->fields;
     }
 
-    public function limit($offset = 0, $rows = null) {
+    public function limit($offset = 0, $rows = null)
+    {
         $this->limit = 'LIMIT ' . $offset . ($rows ? ',' . $rows : null);
         return $this->limit;
     }
 
-    public function order($order) {
+    public function order($order)
+    {
         $this->order = 'ORDER BY ' . $order;
         return $this->order;
     }
@@ -237,7 +249,8 @@ class Pdo extends Driver {
      * @param type $where
      * @param type $linkSn
      */
-    public function where($where, $linkSn = 'and') {
+    public function where($where, $linkSn = 'and')
+    {
         if (is_string($where)) {
             $this->whereStr .= ' ' . $linkSn . ' ' . $where;
         } elseif (is_array($where)) {
@@ -262,7 +275,8 @@ class Pdo extends Driver {
         return $this;
     }
 
-    private function resetWord() {
+    private function resetWord()
+    {
         $this->whereBindArray = [];
         $this->whereStr = '1';
         $this->fields = '';
@@ -270,17 +284,19 @@ class Pdo extends Driver {
         $this->order = '';
     }
 
-    public function setTableName($tableName) {
+    public function setTableName($tableName)
+    {
         $this->tableName = $tableName;
     }
 
-/////////////////////////////////////以下方法为旧方法-不需要修改的方法/////////////////////////////////////
+    /////////////////////////////////////以下方法为旧方法-不需要修改的方法/////////////////////////////////////
 
     /**
      * 关闭数据库
      * @access public
      */
-    public function close() {
+    public function close()
+    {
         $this->linkPDO = null;
     }
 
@@ -290,7 +306,8 @@ class Pdo extends Driver {
      * @access public
      * @return string
      */
-    public function error() {
+    public function error()
+    {
         if ($this->PDOStatement) {
             $error = $this->PDOStatement->errorInfo();
             $this->error = $error[1] . ':' . $error[2];
@@ -300,7 +317,8 @@ class Pdo extends Driver {
         return $this->error;
     }
 
-    public function lastSql() {
+    public function lastSql()
+    {
         return ['_sql' => $this->lastSQL, '_bind' => $this->lastSQLBind];
     }
 
@@ -309,7 +327,8 @@ class Pdo extends Driver {
      * @access public
      * @return integer
      */
-    public function getLastInsertId() {
+    public function getLastInsertId()
+    {
         return $this->linkPDO->lastInsertId();
     }
 
@@ -318,9 +337,10 @@ class Pdo extends Driver {
      * @access public
      * @return void
      */
-    public function startTrans() {
+    public function startTrans()
+    {
         $this->connect();
-        if ($this->transTimes == 0) {//事务 只需要开启1次
+        if ($this->transTimes == 0) { //事务 只需要开启1次
             $this->linkPDO->beginTransaction();
         }
         $this->transTimes++;
@@ -332,7 +352,8 @@ class Pdo extends Driver {
      * @access public
      * @return boolen
      */
-    public function commit() {
+    public function commit()
+    {
         if ($this->transTimes > 0) {
             $result = $this->linkPDO->commit();
             $this->transTimes = 0;
@@ -348,7 +369,8 @@ class Pdo extends Driver {
      * @access public
      * @return boolen
      */
-    public function rollback() {
+    public function rollback()
+    {
         if ($this->transTimes > 0) {
             $result = $this->linkPDO->rollback();
             $this->transTimes = 0;
@@ -363,7 +385,8 @@ class Pdo extends Driver {
      * 释放查询结果
      * @access public
      */
-    public function free() {
+    public function free()
+    {
         $this->PDOStatement = null;
     }
 
@@ -371,7 +394,8 @@ class Pdo extends Driver {
      * 初始化数据库连接
      * @access public
      */
-    public function connect($config = '') {
+    public function connect($config = '')
+    {
         if (!isset($this->linkPDO)) {
             if (isset($this->config['db_persistent']) && $this->config['db_persistent']) {
                 $this->config['db_params'][\Pdo::ATTR_PERSISTENT] = true; // 是否使用永久连接
@@ -386,7 +410,7 @@ class Pdo extends Driver {
                 throw $e;
             }
         }
-        if (isset($this->config['db_check']) && $this->config['db_check'] && !$this->reConnTimes && !$this->checkConn()) {//配置参数中，要求时刻检查数据库连接情况，并且重连次数未超额
+        if (isset($this->config['db_check']) && $this->config['db_check'] && !$this->reConnTimes && !$this->checkConn()) { //配置参数中，要求时刻检查数据库连接情况，并且重连次数未超额
             $this->reConnTimes--;
             $this->connect();
         }
@@ -399,23 +423,24 @@ class Pdo extends Driver {
 
     public $reConnTimes = 3;
 
-    public function checkConn() {
+    public function checkConn()
+    {
         if (!isset($this->linkPDO)) {
             return false;
         }
         try {
             $this->linkPDO->getAttribute(PDO::ATTR_SERVER_INFO); //获取数据库基本信息，作为心跳标志
         } catch (PDOException $e) {
-//            if (strpos($e->getMessage(), 'MySQL server has gone away') !== false) {
-//                return false;
-//            }
+            //            if (strpos($e->getMessage(), 'MySQL server has gone away') !== false) {
+            //                return false;
+            //            }
             return false;
         }
         return true;
     }
 
-    public function resetConn() {
+    public function resetConn()
+    {
         $this->close();
     }
-
 }

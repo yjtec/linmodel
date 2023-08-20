@@ -9,24 +9,27 @@ use Yjtec\Linmodel\Db\Intf;
  *
  * @author Administrator
  */
-class Model implements Intf {
+class Model implements Intf
+{
 
     public static $dbInstance;
     public $db;
     public $dbConfig;
     public $tableName;
 
-    public function __construct($config = '') {
+    public function __construct($config = '')
+    {
         $this->dbConfig = $this->parseConfig($config);
         $this->db = $this->getDb($this->dbConfig);
     }
 
-    private function getDb($dbConfig) {
+    private function getDb($dbConfig)
+    {
         $guid = \Yjtec\Lintools\Tools::toGuidString($dbConfig);
         if (!isset(self::$dbInstance[$guid])) {
             $dbType = ucwords(strtolower($dbConfig['db_type']));
             $class = '\\Yjtec\Linmodel\\Db\\' . $dbType;
-            if (class_exists($class)) {// 检查驱动类
+            if (class_exists($class)) { // 检查驱动类
                 self::$dbInstance[$guid] = new $class($dbConfig);
             } else {
                 throw new Exception('数据库驱动不存在');
@@ -35,7 +38,8 @@ class Model implements Intf {
         return self::$dbInstance[$guid];
     }
 
-    private function parseConfig($db_config = '') {
+    private function parseConfig($db_config = '')
+    {
         if (!is_array($db_config)) {
             $db_config = array();
         }
@@ -52,47 +56,56 @@ class Model implements Intf {
         );
     }
 
-    public function query($sql, $bind = array()) {
+    public function query($sql, $bind = array())
+    {
         return $this->db->query($sql, $bind);
     }
 
-    public function execute($sql, $bind = array()) {
+    public function execute($sql, $bind = array())
+    {
         return $this->db->execute($sql, $bind);
     }
 
-    public function lastSql() {
+    public function lastSql()
+    {
         return $this->db->lastSql();
     }
 
-    public function checkConn() {
+    public function checkConn()
+    {
         return $this->db->checkConn();
     }
 
-    public function resetConn() {
+    public function resetConn()
+    {
         return $this->db->resetConn();
     }
 
-    public function table($table = '') {
+    public function table($table = '')
+    {
         $this->tableName = $table;
         return $this;
     }
 
-    public function getTableName() {
+    public function getTableName()
+    {
         if (empty($this->tableName)) {
             $this->tableName = \Yjtec\Lintools\Tools::parseName($this->dbConfig['db_prefix'] . $this->getModelName());
         }
-        return '`'.$this->dbConfig['db_name'] . '`.`' . $this->tableName.'`';
+        return '`' . $this->dbConfig['db_name'] . '`.`' . $this->tableName . '`';
     }
 
-    public function getModelName() {
+    public function getModelName()
+    {
         $name = substr(get_class($this), 0, -strlen('Md'));
-        if ($pos = strrpos($name, '\\')) {//有命名空间
+        if ($pos = strrpos($name, '\\')) { //有命名空间
             $name = substr($name, $pos + 1);
         }
         return strtolower(preg_replace("/([A-Z])/", "_\\1", $name));
     }
 
-    private function setDbTableName() {
+    private function setDbTableName()
+    {
         return $this->db->setTableName($this->getTableName());
     }
 
@@ -101,65 +114,76 @@ class Model implements Intf {
      * @param type $data
      * @param type $all
      */
-    public function add($data) {
+    public function add($data)
+    {
         $this->setDbTableName();
         return $this->db->add($data);
     }
 
-    public function delete() {
+    public function delete()
+    {
         $this->setDbTableName();
         return $this->db->delete();
     }
 
-    public function update($data) {
+    public function update($data)
+    {
         $this->setDbTableName();
         return $this->db->update($data);
     }
 
-    public function select($one = false, $count = false) {
+    public function select($one = false, $count = false)
+    {
         $this->setDbTableName();
         return $this->db->select($one, $count);
     }
 
-    public function field($field = '*') {
-        $this->db->field($field);
+    public function field($field = '*', $dot = '`')
+    {
+        $this->db->field($field, $dot);
         return $this;
     }
 
-    public function where($where, $linkSn = 'and') {
+    public function where($where, $linkSn = 'and')
+    {
         $this->db->where($where, $linkSn);
         return $this;
     }
 
-    public function limit($offset = 0, $rows = null) {
+    public function limit($offset = 0, $rows = null)
+    {
         $this->db->limit($offset, $rows);
         return $this;
     }
 
-    public function order($order) {
+    public function order($order)
+    {
         $this->db->order($order);
         return $this;
     }
 
-    public function startTrans() {
+    public function startTrans()
+    {
         $this->db->startTrans();
         return $this;
     }
 
-    public function commit() {
+    public function commit()
+    {
         return $this->db->commit();
     }
 
-    public function rollback() {
+    public function rollback()
+    {
         return $this->db->rollback();
     }
 
-    public function count() {
+    public function count()
+    {
         $cnt = $this->select(TRUE, true);
         if (isset($cnt['cnt'])) {
             return $cnt['cnt'];
         }
         return 0;
     }
-
 }
