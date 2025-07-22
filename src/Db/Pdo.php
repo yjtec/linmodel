@@ -3,6 +3,7 @@
 namespace Yjtec\Linmodel\Db;
 
 use PDOException;
+use Exception;
 
 /**
  * PDO数据库驱动 
@@ -25,6 +26,7 @@ class Pdo extends Driver
     protected $fields = '';
     protected $limit = '';
     protected $order = '';
+    protected $group = '';
 
     /**
      * 架构函数 读取数据库配置信息
@@ -195,7 +197,7 @@ class Pdo extends Driver
     {
         $limit = $one ? "LIMIT 0,1" : $this->limit;
         $filed = ($count ? 'count(*) as cnt' : ($this->fields ? $this->fields : "*"));
-        $sql = "SELECT " . $filed . ' FROM ' . $this->tableName . ' WHERE ' . $this->whereStr . ' ' . $this->order . ' ' . $limit . ' ';
+        $sql = "SELECT " . $filed . ' FROM ' . $this->tableName . ' WHERE ' . $this->whereStr . ' ' . $this->order  . ' ' . $this->group . ' ' . $limit . ' ';
         $result = $this->query($sql, $this->whereBindArray);
         $this->resetWord();
         if ($one) {
@@ -227,19 +229,25 @@ class Pdo extends Driver
             $fStr = rtrim($fStr, ',');
         }
         $this->fields .= $fStr ? ($this->fields ? ',' : '') . $fStr : '';
-        return $this->fields;
+        return $this;
     }
 
     public function limit($offset = 0, $rows = null)
     {
         $this->limit = 'LIMIT ' . $offset . ($rows ? ',' . $rows : null);
-        return $this->limit;
+        return $this;
     }
 
     public function order($order)
     {
         $this->order = 'ORDER BY ' . $order;
-        return $this->order;
+        return $this;
+    }
+
+    public function group($group)
+    {
+        $this->group = 'GROUP BY ' . $group;
+        return $this;
     }
 
     /**
@@ -282,6 +290,7 @@ class Pdo extends Driver
         $this->fields = '';
         $this->limit = '';
         $this->order = '';
+        $this->group = '';
     }
 
     public function setTableName($tableName)

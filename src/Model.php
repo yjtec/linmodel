@@ -3,6 +3,7 @@
 namespace Yjtec\Linmodel;
 
 use Yjtec\Linmodel\Db\Intf;
+use Exception;
 
 /**
  * 模型基类，数据库模型均继承与此类
@@ -159,6 +160,11 @@ class Model implements Intf
     public function order($order)
     {
         $this->db->order($order);
+        return $this;
+    }
+    public function group($group)
+    {
+        $this->db->group($group);
         return $this;
     }
 
